@@ -22,10 +22,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import javax.inject.Inject;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
@@ -41,7 +38,10 @@ public class BackendConfigurationTest {
     public Option[] config() throws IOException {
         return ContainerConfiguration.withDefaultConfig(
                 editConfigurationFilePut("etc/etcetera.properties", "backends",
-                                         "main, overlay"),
+                                         "base, main, overlay"),
+                editConfigurationFilePut("etc/etcetera.properties", "base.service", "file"),
+                editConfigurationFilePut("etc/etcetera.properties", "base.path", "lib"),
+                editConfigurationFilePut("etc/etcetera.properties", "base.save", "ALL"),
                 editConfigurationFilePut("etc/etcetera.properties", "main.service", "file"),
                 editConfigurationFilePut("etc/etcetera.properties", "main.path", "bin"),
                 editConfigurationFilePut("etc/etcetera.properties", "main.save", "FILES"),
@@ -59,13 +59,19 @@ public class BackendConfigurationTest {
     public void backendsStarted() throws InvalidSyntaxException {
         Collection<ServiceReference<ConfigBackend>> references = bundleContext
                 .getServiceReferences(ConfigBackend.class,
-                                      "(&(name=main)(path=bin)(order=0))");
+                                      "(&(name=base)(path=lib)(order=0))");
         assertFalse(references.isEmpty());
         assertEquals(1, references.size());
 
         references = bundleContext
                 .getServiceReferences(ConfigBackend.class,
-                                      "(&(name=overlay)(path=data)(order=1))");
+                                      "(&(name=main)(path=bin)(order=1))");
+        assertFalse(references.isEmpty());
+        assertEquals(1, references.size());
+
+        references = bundleContext
+                .getServiceReferences(ConfigBackend.class,
+                                      "(&(name=overlay)(path=data)(order=2))");
 
         assertFalse(references.isEmpty());
         assertEquals(1, references.size());
@@ -134,6 +140,28 @@ public class BackendConfigurationTest {
 
         // Unknown keys should propagate here
         assertEquals("updated3", config.get("test3"));
+
+    }
+
+    @Test(timeout = 5000)
+    public void creating() throws IOException {
+        ServiceReference<ConfigurationAdmin> reference = bundleContext
+                .getServiceReference(ConfigurationAdmin.class);
+        ConfigurationAdmin configurationAdmin = bundleContext.getService(reference);
+
+        org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("new");
+
+        Hashtable<String, Object> update = new Hashtable<>();
+        update.put("test", "passed");
+        configuration.update(update);
+
+        Map<String, String> config = new HashMap<>();
+
+        do {
+            try {
+                config = ConfigFileReader.read("lib/new.cfg", new FileInputStream("lib/new.cfg"));
+            } catch (IOException e) {}
+        } while (config.get("test") == null || !config.get("test").contentEquals("passed"));
 
     }
 

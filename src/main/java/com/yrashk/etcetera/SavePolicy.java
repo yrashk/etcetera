@@ -10,5 +10,6 @@ package com.yrashk.etcetera;
 public enum SavePolicy {
     NONE,
     FILES,
-    PROPERTIES
+    PROPERTIES,
+    ALL
 }

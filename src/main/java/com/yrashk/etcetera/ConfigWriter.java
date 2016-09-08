@@ -80,11 +80,14 @@ public class ConfigWriter implements ConfigurationListener {
                 try {
                     Configuration config = configurationAdmin.getConfiguration(event.getPid(), event.getFactoryPid());
                     Dictionary dict = config.getProperties();
-                    if (policy == SavePolicy.FILES &&
-                        backend.getFilenames().stream().anyMatch(name -> name.contentEquals(filename))) {
-                        boolean isXML;
-                        try (InputStream fileInputStream = backend.getFileInputStream(filename)) {
-                            isXML = fileInputStream.read() == '<';
+                    boolean fileExists = backend.getFilenames().stream().anyMatch(name -> name.contentEquals(filename));
+                    if ((policy == SavePolicy.FILES && fileExists) ||
+                         policy == SavePolicy.ALL) {
+                        boolean isXML = false;
+                        if (fileExists) {
+                            try (InputStream fileInputStream = backend.getFileInputStream(filename)) {
+                                isXML = fileInputStream.read() == '<';
+                            }
                         }
                         ByteArrayOutputStream bos = new ByteArrayOutputStream();
                         Properties props = new Properties();
@@ -100,8 +103,7 @@ public class ConfigWriter implements ConfigurationListener {
                         }
                         backend.save(filename, bos.toString());
                     }
-                    if (policy == SavePolicy.PROPERTIES &&
-                        backend.getFilenames().stream().anyMatch(name -> name.contentEquals(filename))) {
+                    if (policy == SavePolicy.PROPERTIES && fileExists) {
                         boolean isXML;
                         try (InputStream fileInputStream = backend.getFileInputStream(filename)) {
                             isXML = fileInputStream.read() == '<';
