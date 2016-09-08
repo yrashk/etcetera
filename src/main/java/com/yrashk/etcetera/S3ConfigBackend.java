@@ -58,6 +58,10 @@ public class S3ConfigBackend implements ConfigBackend {
         return client.getObject(bucket, name).getObjectContent();
     }
 
+    @Override public void save(String name, String content) throws IOException {
+        client.putObject(bucket, name, content);
+    }
+
     @Override public int getOrder() {
         return order;
     }

@@ -42,7 +42,6 @@ public class ConfigScanner {
                 InputStream fileInputStream = backend.getFileInputStream(name);
                 Map<String, String> config = ConfigFileReader
                         .read(name, fileInputStream, context.getBundleContext());
-                fileInputStream.close();
                 if (config.size() > 0) {
                     String factory = getFactory(name);
                     String pid = getPid(name);

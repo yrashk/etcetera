@@ -44,6 +44,7 @@ public class ConfigFileReader {
             p.forEach((key, value) -> config.put(key.toString(), value.toString()));
             InterpolationHelper.performSubstitution(config, bundleContext);
         }
+        inputStream.close();
         return config;
     }
 

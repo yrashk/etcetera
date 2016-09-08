@@ -20,12 +20,15 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.inject.Inject;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 
 import static org.junit.Assert.*;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
@@ -41,8 +44,10 @@ public class BackendConfigurationTest {
                                          "main, overlay"),
                 editConfigurationFilePut("etc/etcetera.properties", "main.service", "file"),
                 editConfigurationFilePut("etc/etcetera.properties", "main.path", "bin"),
+                editConfigurationFilePut("etc/etcetera.properties", "main.save", "FILES"),
                 editConfigurationFilePut("etc/etcetera.properties", "overlay.service", "file"),
                 editConfigurationFilePut("etc/etcetera.properties", "overlay.path", "data"),
+                editConfigurationFilePut("etc/etcetera.properties", "overlay.save", "PROPERTIES"),
                 editConfigurationFilePut("bin/test.cfg", "test1", "value1"),
                 editConfigurationFilePut("bin/test.cfg", "test2", "value1"),
                 editConfigurationFilePut("data/test.cfg", "test2", "value2"),
@@ -99,6 +104,37 @@ public class BackendConfigurationTest {
         assertEquals("value3", properties.get("test3"));
 
         bundleContext.ungetService(reference);
+    }
+
+    @Test(timeout = 5000)
+    public void updating() throws IOException {
+        ServiceReference<ConfigurationAdmin> reference = bundleContext
+                .getServiceReference(ConfigurationAdmin.class);
+        ConfigurationAdmin configurationAdmin = bundleContext.getService(reference);
+
+        org.osgi.service.cm.Configuration configuration = configurationAdmin.getConfiguration("test");
+
+        Hashtable<String, Object> update = new Hashtable<>();
+        update.put("test2", "updated2");
+        update.put("test3", "updated3");
+        configuration.update(update);
+
+        Map<String, String> config;
+
+        do {
+            config = ConfigFileReader.read("data/test.cfg", new FileInputStream("data/test.cfg"));
+        } while (config.get("test2") == null || !config.get("test2").contentEquals("updated2"));
+
+        // No other keys have leaked
+        assertEquals(1, config.size());
+
+        do {
+            config = ConfigFileReader.read("bin/test.cfg", new FileInputStream("bin/test.cfg"));
+        } while (config.get("test2") == null || !config.get("test2").contentEquals("updated2"));
+
+        // Unknown keys should propagate here
+        assertEquals("updated3", config.get("test3"));
+
     }
 
     @Test

@@ -13,7 +13,10 @@ import java.util.Collection;
 
 public interface ConfigBackend {
     Collection<String> getFilenames();
+
     InputStream getFileInputStream(String name) throws IOException;
+    void save(String name, String content) throws IOException;
+
     int getOrder();
     String getName();
 }

@@ -13,10 +13,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.ServiceScope;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -28,18 +25,28 @@ public class FileConfigBackend implements ConfigBackend {
 
     @Override public Collection<String> getFilenames() {
         try {
-            return Files.walk(new File(path).toPath()).
-                    filter(path -> path.toFile().isFile()).
-                    map(Path::toString).
-                    collect(Collectors.toList());
+            return Files.walk(new File(path).toPath())
+                    .map(Path::toFile)
+                    .filter(File::isFile)
+                    .map(file -> file.toString().substring(path.length() + 1))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             return Collections.emptyList();
         }
     }
 
     @Override public InputStream getFileInputStream(String name) throws IOException {
-        return new FileInputStream(name);
+        return new FileInputStream(getFilename(name));
     }
+
+    @Override public void save(String name, String content) throws IOException {
+        FileWriter fileWriter = new FileWriter(getFilename(name));
+        fileWriter.write(content);
+        fileWriter.close();
+    }
+
+    private String getFilename(String name) {return path + File.separatorChar + name;}
+
 
     private String path;
     private String name;
@@ -49,11 +56,6 @@ public class FileConfigBackend implements ConfigBackend {
         this.path = path;
         this.name = name;
         this.order = order;
-    }
-
-    @Activate
-    protected void activate(ComponentContext context) {
-        System.out.println("context = " + context.getProperties());
     }
 
     @Override public int getOrder() {
