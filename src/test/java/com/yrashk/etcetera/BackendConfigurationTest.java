@@ -46,7 +46,7 @@ public class BackendConfigurationTest {
                 editConfigurationFilePut("etc/etcetera.properties", "main.path", "bin"),
                 editConfigurationFilePut("etc/etcetera.properties", "main.save", "FILES"),
                 editConfigurationFilePut("etc/etcetera.properties", "overlay.service", "file"),
-                editConfigurationFilePut("etc/etcetera.properties", "overlay.path", "data"),
+                editConfigurationFilePut("etc/etcetera.properties", "overlay.path", "${karaf.data}"),
                 editConfigurationFilePut("etc/etcetera.properties", "overlay.save", "PROPERTIES"),
                 editConfigurationFilePut("bin/test.cfg", "test1", "value1"),
                 editConfigurationFilePut("bin/test.cfg", "test2", "value1"),
@@ -71,7 +71,7 @@ public class BackendConfigurationTest {
 
         references = bundleContext
                 .getServiceReferences(ConfigBackend.class,
-                                      "(&(name=overlay)(path=data)(order=2))");
+                                      "(&(name=overlay)(path=" + System.getProperty("karaf.data") + ")(order=2))");
 
         assertFalse(references.isEmpty());
         assertEquals(1, references.size());

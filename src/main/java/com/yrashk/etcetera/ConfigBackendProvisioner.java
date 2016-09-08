@@ -43,7 +43,12 @@ public class ConfigBackendProvisioner {
         props.put("etc.path", KARAF_ETC);
         if (propertiesFile.exists()) {
             try {
-                props.load(new FileInputStream(propertiesFile));
+                Map<String, String> cfg = ConfigFileReader
+                        .read(propertiesFile.toString() + ".cfg", new FileInputStream(propertiesFile),
+                              context.getBundleContext());
+                for (Map.Entry<String, String> entry : cfg.entrySet()) {
+                    props.put(entry.getKey(), entry.getValue());
+                }
             } catch (IOException e) {
                 throw new RuntimeException(ETCETERA_PROPERTIES + " can't be read");
             }
