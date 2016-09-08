@@ -1,0 +1,113 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.1.0'
+        classpath 'com.github.lburgazzoli:gradle-karaf-plugin:0.0.40'
+    }
+}
+
+plugins {
+    id "com.github.hierynomus.license" version "0.12.1"
+}
+
+apply plugin: 'license'
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'osgi'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'java-library-distribution'
+apply plugin: 'biz.aQute.bnd.builder'
+apply plugin: "com.github.lburgazzoli.karaf"
+
+
+license {
+    header project.file('LICENSE-HEADER')
+}
+
+publishing {
+    publications {
+        Publication(MavenPublication) {
+            from components.java
+            groupId project.group
+            artifactId project.name
+            version project.version
+            artifact("${rootProject.buildDir}/karaf/features/${rootProject.name}-${rootProject.version}.xml") {
+                classifier "features"
+            }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+configurations {
+    dist
+    dist.exclude group: 'org.osgi'
+}
+
+dependencies {
+    // OSGi
+    compileOnly 'org.osgi:org.osgi.core:6.0.0'
+    testCompile 'org.osgi:org.osgi.core:6.0.0'
+    compileOnly 'org.osgi:org.osgi.service.cm:1.5.0'
+    testCompile 'org.osgi:org.osgi.service.cm:1.5.0'
+    compileOnly 'org.osgi:org.osgi.service.component:1.3.0'
+    testCompile 'org.osgi:org.osgi.service.cm:1.5.0'
+    compileOnly 'biz.aQute.bnd:biz.aQute.bndlib:3.2.0'
+
+    compile 'org.apache.felix:org.apache.felix.utils:1.8.2'
+    dist 'org.apache.felix:org.apache.felix.utils:1.8.2'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.slf4j:slf4j-simple:1.7.18'
+
+    testCompile 'org.ops4j.pax.exam:pax-exam:4.9.1'
+    testCompile 'org.ops4j.pax.exam:pax-exam-junit4:4.9.1'
+    testCompile 'org.ops4j.pax.exam:pax-exam-container-karaf:4.9.1'
+    testCompile 'org.ops4j.pax.url:pax-url-aether:2.4.7'
+    testCompile 'org.ops4j.pax.url:pax-url-wrap:2.4.7'
+    testCompile 'org.ops4j.pax.url:pax-url-link:2.4.7'
+    testCompile 'org.ops4j.pax.url:pax-url-classpath:2.4.7'
+    testCompile 'javax.inject:javax.inject:1'
+
+}
+
+karaf {
+    features {
+        xsdVersion = '1.3.0'
+        repository "mvn:org.apache.karaf.features/standard/4.0.6/xml/features"
+
+
+        feature {
+            name = 'etcetera'
+            includeProject = true
+
+            configurations 'dist'
+
+            feature('scr') {
+                version = "4.0.6"
+            }
+
+            feature('wrap') {
+                prerequisite = true
+            }
+        }
+    }
+
+    kar {}
+}
+
+publishToMavenLocal.dependsOn generateFeatures
+
+test.dependsOn publishToMavenLocal
