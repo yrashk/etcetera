@@ -141,6 +141,9 @@ public class BackendConfigurationTest {
         // Unknown keys should propagate here
         assertEquals("updated3", config.get("test3"));
 
+        // service.pid should not leak
+        assertNull(config.get("service.pid"));
+
     }
 
     @Test(timeout = 5000)

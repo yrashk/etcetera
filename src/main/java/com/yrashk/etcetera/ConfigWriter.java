@@ -8,6 +8,7 @@
 package com.yrashk.etcetera;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -94,7 +95,10 @@ public class ConfigWriter implements ConfigurationListener {
                         for (Enumeration e = dict.keys(); e.hasMoreElements(); ) {
                             String key = e.nextElement().toString();
                             String value = dict.get(key).toString();
-                            props.put(key, value);
+                            if (!key.contentEquals(Constants.SERVICE_PID) &&
+                                !key.contentEquals(ConfigurationAdmin.SERVICE_FACTORYPID)) {
+                                props.put(key, value);
+                            }
                         }
                         if (isXML) {
                             props.storeToXML(bos, "");
@@ -117,11 +121,15 @@ public class ConfigWriter implements ConfigurationListener {
                         Properties props = new Properties();
 
                         for (Map.Entry<String, String> entry : original.entrySet()) {
-                            Object newValue = dict.get(entry.getKey());
-                            if (newValue == null) {
-                                props.put(entry.getKey(), entry.getValue());
-                            } else {
-                                props.put(entry.getKey(), newValue);
+                            String key = entry.getKey();
+                            if (!key.contentEquals(Constants.SERVICE_PID) &&
+                                !key.contentEquals(ConfigurationAdmin.SERVICE_FACTORYPID)) {
+                                Object newValue = dict.get(key);
+                                if (newValue == null) {
+                                    props.put(key, entry.getValue());
+                                } else {
+                                    props.put(key, newValue);
+                                }
                             }
                         }
 
