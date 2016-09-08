@@ -47,9 +47,9 @@ public class ConfigScanner {
                     String pid = getPid(name);
                     Configuration configuration;
                     if (factory == null) {
-                        configuration = configurationAdmin.getConfiguration(pid);
+                        configuration = configurationAdmin.getConfiguration(pid, null);
                     } else {
-                        configuration = configurationAdmin.createFactoryConfiguration(pid);
+                        configuration = configurationAdmin.createFactoryConfiguration(pid, null);
                     }
                     @SuppressWarnings("unchecked")
                     Dictionary<String, Object> properties = configuration.getProperties();

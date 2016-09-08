@@ -83,6 +83,9 @@ public class BackendConfigurationTest {
                 .getServiceReference(ConfigurationAdmin.class);
         ConfigurationAdmin configurationAdmin = bundleContext.getService(reference);
 
+        // No bundle location set
+        assertNull(configurationAdmin.getConfiguration("test", null).getBundleLocation());
+
         Dictionary<String, Object> properties = configurationAdmin.getConfiguration("test").getProperties();
 
         assertNotNull(properties);
