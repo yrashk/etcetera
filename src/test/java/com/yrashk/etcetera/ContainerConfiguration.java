@@ -53,6 +53,7 @@ public class ContainerConfiguration {
                 features(karafStandardRepo),
                 features(etceteraRepo, "etcetera"),
                 junitBundles(),
+                systemPackages("javax.mail","javax.mail.internet"),
                 keepRuntimeFolder(),
                 configureConsole().ignoreLocalConsole().ignoreRemoteShell()
         };

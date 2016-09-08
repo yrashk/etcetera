@@ -69,6 +69,12 @@ dependencies {
     compile 'org.apache.felix:org.apache.felix.utils:1.8.2'
     dist 'org.apache.felix:org.apache.felix.utils:1.8.2'
 
+    compile 'com.amazonaws:aws-java-sdk-osgi:1.11.32'
+    dist 'com.amazonaws:aws-java-sdk-osgi:1.11.32'
+
+    compile 'com.amazonaws:jmespath-java:1.0'
+    dist 'com.amazonaws:jmespath-java:1.0'
+
     testCompile 'junit:junit:4.12'
     testCompile 'org.slf4j:slf4j-simple:1.7.18'
 

@@ -14,6 +14,7 @@ import org.osgi.service.component.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Component(immediate = true, scope = ServiceScope.SINGLETON)
@@ -38,8 +39,10 @@ public class ConfigScanner {
     protected void activate(ComponentContext context) throws IOException {
         for (ConfigBackend backend : backends) {
             for (String name : backend.getFilenames()) {
+                InputStream fileInputStream = backend.getFileInputStream(name);
                 Map<String, String> config = ConfigFileReader
-                        .read(name, backend.getFileInputStream(name), context.getBundleContext());
+                        .read(name, fileInputStream, context.getBundleContext());
+                fileInputStream.close();
                 if (config.size() > 0) {
                     String factory = getFactory(name);
                     String pid = getPid(name);

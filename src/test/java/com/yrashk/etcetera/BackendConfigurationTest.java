@@ -91,7 +91,6 @@ public class BackendConfigurationTest {
         org.osgi.service.cm.Configuration[] configurations = configurationAdmin
                 .listConfigurations("(service.factoryPid=test)");
         assertNotNull(configurations);
-        assertEquals(1, configurations.length);
 
         Dictionary<String, Object> properties = configurations[0].getProperties();
 
