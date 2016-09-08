@@ -50,6 +50,12 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        instruction 'Karaf-Commands', '*'
+    }
+}
+
 
 configurations {
     dist
@@ -74,6 +80,11 @@ dependencies {
 
     compile 'com.amazonaws:jmespath-java:1.0'
     dist 'com.amazonaws:jmespath-java:1.0'
+
+    compile 'org.apache.karaf.shell:org.apache.karaf.shell.core:4.0.5'
+    compile 'org.apache.karaf.shell:org.apache.karaf.shell.commands:4.0.5'
+    compile 'org.apache.karaf.shell:org.apache.karaf.shell.console:4.0.5'
+    compile 'org.apache.karaf.shell:org.apache.karaf.shell.table:4.0.5'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.slf4j:slf4j-simple:1.7.18'
