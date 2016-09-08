@@ -6,11 +6,14 @@ buildscript {
     dependencies {
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.1.0'
         classpath 'com.github.lburgazzoli:gradle-karaf-plugin:0.0.40'
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
     }
 }
 
 plugins {
     id "com.github.hierynomus.license" version "0.12.1"
+    id 'net.researchgate.release' version '2.3.4'
 }
 
 apply plugin: 'license'
@@ -22,10 +25,17 @@ apply plugin: 'maven-publish'
 apply plugin: 'java-library-distribution'
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: "com.github.lburgazzoli.karaf"
-
+apply plugin: 'signing'
+apply plugin: 'io.codearte.nexus-staging'
+apply plugin: 'com.bmuschko.nexus'
 
 license {
     header project.file('LICENSE-HEADER')
+}
+
+release {
+    tagTemplate = 'v${version}'
+    failOnPublishNeeded = false
 }
 
 publishing {
@@ -35,8 +45,40 @@ publishing {
             groupId project.group
             artifactId project.name
             version project.version
-            artifact("${rootProject.buildDir}/karaf/features/${rootProject.name}-${rootProject.version}.xml") {
+            artifact("${rootProject.buildDir}/karaf/features/${rootProject.name}-${rootProject.version}-features.xml") {
                 classifier "features"
+            }
+        }
+    }
+}
+
+
+modifyPom {
+    project {
+        name 'etcetera'
+        description 'Extended Backend for OSGi Configuration Files'
+        url 'https://github.com/yrashk/etcetera'
+        inceptionYear '2016'
+
+        scm {
+            url 'https://github.com/yrashk/etcetera'
+            developerConnection 'scm:https://yrashk@github.com/yrashk/etcetera.git'
+            connection 'scm:git://github.com/yrashk/etcetera.git'
+        }
+
+        licenses {
+            license {
+                name 'Mozilla Public License, v. 2.0'
+                url 'http://mozilla.org/MPL/2.0/'
+                distribution 'repo'
+            }
+        }
+
+        developers {
+            developer {
+                id 'yrashk'
+                name 'Yurii Rashkovskii'
+                email 'yrashk@gmail.com'
             }
         }
     }
@@ -119,6 +161,11 @@ karaf {
             feature('wrap') {
                 prerequisite = true
             }
+
+            outputFile = new File(
+                    "${project.buildDir}/karaf/features",
+                    "${name}-${version}-features.xml"
+            )
         }
     }
 

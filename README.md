@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/yrashk/etcetera.svg?branch=master)](https://travis-ci.org/yrashk/etcetera)
+[![Maven Central](https://img.shields.io/maven-central/v/com.yrashk/etcetera.svg?maxAge=2592000)](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%20%22com.yrashk%22%20a%3A%22etcetera%22)
 
 # Etcetera
 
