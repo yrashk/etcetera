@@ -95,6 +95,8 @@ repositories {
 jar {
     manifest {
         instruction 'Karaf-Commands', '*'
+        instruction 'Provide-Capability',
+                'osgi.service;objectClass:List<String>="com.yrashk.etcetera.ConfigBackend"'
     }
 }
 
