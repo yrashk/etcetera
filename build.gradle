@@ -165,7 +165,7 @@ karaf {
             }
 
 	    bundle('com.yrashk:etcetera') {
-                attribute 'start-level', '10'
+                attribute 'start-level', '1'
             }
 
             outputFile = new File(
